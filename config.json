@@ -1,0 +1,48 @@
+{
+  "port": 8080,
+
+  "logging": {
+    "enable": true,
+    "logFile": "proxy.log"
+  },
+
+  "caching": {
+    "enable": true,
+	 "size": 200
+  },
+
+  "privacy": {
+    "enable": true,
+    "userAgent": "CN Proxy Server (v1.0.0)"
+  },
+
+  "restriction": {
+    "enable": true,
+    "targets": [
+      {
+        "URL": "sib.ir",
+        "notify": "true"
+      },
+      {
+        "URL": "acm.ut.ac.ir",
+        "notify": "false"
+      }
+    ]
+  },
+  
+	"accounting":{
+		"users":[
+			{
+				"IP": "127.0.0.1",
+				"volume":"80000000" 
+			}
+		]
+	},
+	
+  "HTTPInjection": {
+    "enable": true,
+    "post": {
+      "body": "پروژه 2 درس شبکه های کامپیوتری"
+    }
+  }
+}

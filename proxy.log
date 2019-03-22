@@ -1,0 +1,30 @@
+[07/Mar/2004:16:30:29] Proxy launched
+[07/Mar/2004:16:30:30] Creating server socket...
+[07/Mar/2004:16:30:31] Binding socket to port 4567...
+[07/Mar/2004:16:30:31] Listening for incoming requests...
+
+[07/Mar/2004:16:30:49] Accepted a request from client!
+[07/Mar/2004:16:30:50] Client sent request to proxy with headers:
+[07/Mar/2004:16:30:51] connect to [127.0.0.1] from localhost [127.0.0.1] 58449
+
+[07/Mar/2004:16:30:55]
+----------------------------------------------------------------------
+GET http://www.google.com/about HTTP/1.0
+Host: www.google.com
+User-Agent: Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.10) Gecko/20100914 SUSE/3.6.10-0.3.1 Firefox/3.6.10
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-us,en;q=0.5
+Accept-Encoding: gzip,deflate
+Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+Connection: close
+Proxy-Connection: close
+Cookie: PREF=ID=26f64f4db9ded6b0:TM=1282757759:LM=1282757759:S=Let1OpLRTDqORqvq
+------------------------------------------------------------------------
+
+[07/Mar/2004:16:30:55] Proxy opening connection to server www.google.com [74.125.19.104]... Connection opened.
+[07/Mar/2004:16:30:56] Proxy sent request to server with headers:
+<headers go here...>
+[07/Mar/2004:16:30:57] Server sent response to proxy with headers:
+<headers go here>
+[07/Mar/2004:16:30:59] Proxy sent response to client with headers:
+<headers go here>
