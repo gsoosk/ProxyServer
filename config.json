@@ -3,7 +3,7 @@
 
   "logging": {
     "enable": true,
-    "logFile": "proxy.log"
+    "logFile": "proxy2.log"
   },
 
   "caching": {

@@ -2,6 +2,7 @@ import signal
 import socket
 import threading
 from Parsers.HttpParser import HttpParser
+from ProxyFeatures.Log import Log
 
 class Proxy:
 
@@ -10,76 +11,87 @@ class Proxy:
     hostName = None
     serverSocket = None
     maxRequestLength = 100000
+    maxResponseLength = 10000000
     connectionTimeout = 10
+
+    log = None
 
     def __init__(self, config):
         # signal.signal(signal.SIGINT, self.shutdown)
+        self.log = Log(config['logging'])
+        self.log.addLaunchProxy()
         self.setConfig(config) # Setting config to class fields
         self.socketInit()
 
 
-    @classmethod
-    def socketInit(cls):
-        print("Socket Init.....")
-        # Create a TCP socket
-        cls.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # Re-use the socket
-        cls.serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        # bind the socket to a public host, and a port
-        cls.serverSocket.bind((cls.hostName, cls.port))
 
-        cls.serverSocket.listen(10)  # become a server socket
-        cls.clients = {}
+    def socketInit(self):
+        self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.log.addCreateSocket()
 
-    @classmethod
-    def setConfig(cls, config):
-        print("Setting Config.....")
-        cls.port = config['port']
-        cls.hostName = '127.0.0.1'
+        self.serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.serverSocket.bind((self.hostName, self.port))
+        self.log.addBindingSocket(port = self.port)
 
-    @classmethod
-    def acceptClients(cls):
-        print("Accepting clients.....")
+        self.serverSocket.listen(10)  # become a server socket
+        self.log.addListeningForIncomings()
+
+    def setConfig(self, config):
+        self.port = config['port']
+        self.hostName = '127.0.0.1'
+
+    def acceptClients(self):
+        self.log.addWaitForClientsToAccept()
         while True :
-            (clientSocket, clientAddress) = cls.serverSocket.accept()
-            newThread = threading.Thread(target = cls.clientThread,
-                                        args = (clientSocket, clientAddress) )
+            (clientSocket, clientAddress) = self.serverSocket.accept()
+            newThread = threading.Thread(target = self.clientThread,
+                                         args = (clientSocket, clientAddress))
             newThread.setDaemon(True)
             newThread.start()
 
-    @classmethod
-    def clientThread(cls, clientSocket, clientAddress):
-        print("New connection from {}....".format(clientAddress))
-        request = clientSocket.recv(cls.maxRequestLength)
+
+    def clientThread(self, clientSocket, clientAddress):
+        self.log.addAcceptClient(clientAddress)
+        request = clientSocket.recv(self.maxRequestLength)
+        if len(request) <= 0:
+            return
+        self.log.addRequestClientHeaders(request.decode())
 
         url = HttpParser.getUrl(request.decode())
         host, port = HttpParser.getHostAndIp(url)
-        print("Requesting {} : {}  ....".format(host, port))
+        #TODO : Remove hostname and proxy-connection
+        newRequest = request
 
         try:
-            server = cls.sendDataToServer(request, host, port)
-            cls.waitForServer(clientSocket, server)
+            server = self.sendDataToServer(newRequest, host, port)
+            self.waitForServer(clientSocket, server)
         except:
-            print("Time out in request from {} ...".format(url))
+            self.log.addTimeoutToConnectServer(url)
 
 
-    @classmethod #send a copy of request to website server
-    def sendDataToServer(cls, request, host, port):
-        print("Sending a copy of req to website....")
+    #send a copy of request to website server
+    def sendDataToServer(self, request, host, port):
+        self.log.addOpeningConnection(host, port)
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server.settimeout(cls.connectionTimeout)
+        server.settimeout(self.connectionTimeout)
         server.connect((host, port))
+        self.log.addProxySentReq(request.decode())
         server.sendall(request)
         return server
 
-    @classmethod
-    def waitForServer(cls, clientSocket, server):
+    def waitForServer(self, clientSocket, server):
         while True:
             # receive data from web server
-            data = server.recv(cls.maxRequestLength)
+            data = server.recv(self.maxResponseLength)
             if len(data) > 0:
-                print("Receiving data from website and sending to client...")
+                header = HttpParser.getResponseHeader(data)
+                if header is not None :
+                    self.log.addServerSentResponse(header.decode())
+
                 clientSocket.send(data)  # send to browser/client
+
+                if header is not None:
+                    self.log.addProxySentResponse(header.decode())
             else:
                 break
 

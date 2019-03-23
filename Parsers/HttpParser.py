@@ -34,3 +34,13 @@ class HttpParser:
             webserver = temp[:port_pos]
 
         return webserver, port
+    @staticmethod
+    def getResponseHeader(data):
+        for i in range(len(data)):
+            r = b'\r'[0]
+            n = b'\n'[0]
+            #when we have \r\n\r\n we reached end of header
+            if i <= len(data) - 4 and data[i] == r and data[i+1] == n and data[i+2] == r and data[i+3] == n:
+                return data[:i+2]
+
+
