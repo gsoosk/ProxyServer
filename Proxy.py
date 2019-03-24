@@ -71,8 +71,7 @@ class Proxy:
         except:
             self.log.addTimeoutToConnectServer(url)
 
-    @staticmethod
-    def makeNewRequest(request):
+    def makeNewRequest(self, request):
         newRequest = HttpParser.changeHttpVersion(request)
         newRequest = HttpParser.removeHostname(newRequest)
         newRequest = HttpParser.removeProxyConnection(newRequest)
