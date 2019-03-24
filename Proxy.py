@@ -3,6 +3,7 @@ import socket
 import threading
 from Parsers.HttpParser import HttpParser
 from ProxyFeatures.Log import Log
+from ProxyFeatures.privacy import Privacy
 
 class Proxy:
 
@@ -18,6 +19,7 @@ class Proxy:
 
     def __init__(self, config):
         # signal.signal(signal.SIGINT, self.shutdown)
+        self.privacy = Privacy(config['privacy'])
         self.log = Log(config['logging'])
         self.log.addLaunchProxy()
         self.setConfig(config) # Setting config to class fields
@@ -60,7 +62,9 @@ class Proxy:
         url = HttpParser.getUrl(request.decode())
         host, port = HttpParser.getHostAndIp(url)
         #TODO : Remove hostname and proxy-connection
+
         newRequest = request
+        newRequest = self.privacy.setUserAgent(newRequest.decode())
 
         try:
             server = self.sendDataToServer(newRequest, host, port)
@@ -94,7 +98,3 @@ class Proxy:
                     self.log.addProxySentResponse(header.decode())
             else:
                 break
-
-
-
-
