@@ -13,7 +13,7 @@ def writeToFile(originalFunction):
         file = open(logObject.file, 'a+')
         file.write(newLog + "\n")
 
-        print(newLog)
+        # print(newLog)
 
     return new_function
 

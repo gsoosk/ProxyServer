@@ -12,7 +12,7 @@ class Proxy:
     hostName = None
     serverSocket = None
     maxRequestLength = 100000
-    maxResponseLength = 10000000
+    maxResponseLength = 100000
     connectionTimeout = 10
 
     log = None
@@ -57,14 +57,13 @@ class Proxy:
         request = clientSocket.recv(self.maxRequestLength)
         if len(request) <= 0:
             return
-        self.log.addRequestClientHeaders(request.decode())
+        self.log.addRequestClientHeaders(HttpParser.getResponseHeader(request).decode())
 
         url = HttpParser.getUrl(request.decode())
         host, port = HttpParser.getHostAndIp(url)
-        #TODO : Remove hostname and proxy-connection
 
-        newRequest = request
-        newRequest = self.privacy.setUserAgent(newRequest.decode())
+
+        newRequest = self.makeNewRequest(request)
 
         try:
             server = self.sendDataToServer(newRequest, host, port)
@@ -72,6 +71,12 @@ class Proxy:
         except:
             self.log.addTimeoutToConnectServer(url)
 
+    @staticmethod
+    def makeNewRequest(request):
+        newRequest = HttpParser.changeHttpVersion(request)
+        newRequest = HttpParser.removeHostname(newRequest)
+        newRequest = HttpParser.removeProxyConnection(newRequest)
+        return newRequest
 
     #send a copy of request to website server
     def sendDataToServer(self, request, host, port):
@@ -84,17 +89,20 @@ class Proxy:
         return server
 
     def waitForServer(self, clientSocket, server):
+        firstPacket = True
         while True:
             # receive data from web server
             data = server.recv(self.maxResponseLength)
             if len(data) > 0:
-                header = HttpParser.getResponseHeader(data)
-                if header is not None :
+                header = ""
+                if firstPacket :
+                    header = HttpParser.getResponseHeader(data)
                     self.log.addServerSentResponse(header.decode())
 
                 clientSocket.send(data)  # send to browser/client
 
-                if header is not None:
+                if firstPacket :
                     self.log.addProxySentResponse(header.decode())
+                    firstPacket = False
             else:
                 break
