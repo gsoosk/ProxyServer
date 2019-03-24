@@ -81,3 +81,19 @@ class HttpParser:
         reqStr = '\r\n'.join(reqStr)
         return reqStr.encode()
 
+    @staticmethod
+    def removeProxyConnection(request):
+        reqStr = request.decode()
+        reqStr = reqStr.split('\r\n')
+        for i in range(len(reqStr)) :
+            if reqStr[i].split(' ')[0] == 'Connection:' :
+                reqStr[i] = 'Connection: Close'
+                break
+
+        for i in range(len(reqStr)) :
+            if reqStr[i].split(' ')[0] == 'Proxy-Connection:' :
+                reqStr.pop(i)
+                break
+
+        reqStr = '\r\n'.join(reqStr)
+        return reqStr.encode()

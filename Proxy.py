@@ -73,7 +73,7 @@ class Proxy:
     def makeNewRequest(request):
         newRequest = HttpParser.changeHttpVersion(request)
         newRequest = HttpParser.removeHostname(newRequest)
-        # TODO : Remove hostname and proxy-connection
+        newRequest = HttpParser.removeProxyConnection(newRequest)
         return newRequest
 
     #send a copy of request to website server
