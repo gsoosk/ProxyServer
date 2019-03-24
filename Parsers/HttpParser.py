@@ -8,7 +8,7 @@ class HttpParser:
         return url
 
     @staticmethod
-    def getHostAndIp(url):
+    def findWebserverPosAndPortPos(url):
         http_pos = url.find("://")  # find pos of ://
         if http_pos == -1:
             temp = url
@@ -22,17 +22,24 @@ class HttpParser:
         if webserver_pos == -1:
             webserver_pos = len(temp)
 
+        return temp, webserver_pos, port_pos
+
+    @staticmethod
+    def getHostAndIp(url):
+
+        newUrl, webserver_pos, port_pos = HttpParser.findWebserverPosAndPortPos(url)
+
         webserver = ""
         port = -1
         if port_pos == -1 or webserver_pos < port_pos:
 
             # default port
             port = 80
-            webserver = temp[:webserver_pos]
+            webserver = newUrl[:webserver_pos]
 
         else:  # specific port
-            port = int((temp[(port_pos + 1):])[:webserver_pos - port_pos - 1])
-            webserver = temp[:port_pos]
+            port = int((newUrl[(port_pos + 1):])[:webserver_pos - port_pos - 1])
+            webserver = newUrl[:port_pos]
 
         return webserver, port
 
@@ -51,5 +58,26 @@ class HttpParser:
     def changeHttpVersion(request):
         reqStr = request.decode()
         reqStr = reqStr.replace('HTTP/1.1', 'HTTP/1.0', 1)
+        return reqStr.encode()
+
+    @staticmethod
+    def removeHostname(request):
+        reqStr = request.decode()
+        reqStr = reqStr.split('\r\n')
+
+        httpFirstLine = reqStr[0].split(' ')
+        url = httpFirstLine[1]
+
+        newUrl, webserverPos, portPos = HttpParser.findWebserverPosAndPortPos(url)
+
+        if webserverPos == len(newUrl):
+            newUrl = '/'
+        else:
+            newUrl = newUrl[webserverPos:]
+
+
+        httpFirstLine[1] = newUrl
+        reqStr[0] = ' '.join(httpFirstLine)
+        reqStr = '\r\n'.join(reqStr)
         return reqStr.encode()
 

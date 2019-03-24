@@ -55,7 +55,7 @@ class Proxy:
         request = clientSocket.recv(self.maxRequestLength)
         if len(request) <= 0:
             return
-        self.log.addRequestClientHeaders(request.decode())
+        self.log.addRequestClientHeaders(HttpParser.getResponseHeader(request).decode())
 
         url = HttpParser.getUrl(request.decode())
         host, port = HttpParser.getHostAndIp(url)
@@ -72,6 +72,7 @@ class Proxy:
     @staticmethod
     def makeNewRequest(request):
         newRequest = HttpParser.changeHttpVersion(request)
+        newRequest = HttpParser.removeHostname(newRequest)
         # TODO : Remove hostname and proxy-connection
         return newRequest
 
