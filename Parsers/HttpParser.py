@@ -6,6 +6,7 @@ class HttpParser:
         # get url
         url = first_line.split(' ')[1]
         return url
+
     @staticmethod
     def getHostAndIp(url):
         http_pos = url.find("://")  # find pos of ://
@@ -34,13 +35,22 @@ class HttpParser:
             webserver = temp[:port_pos]
 
         return webserver, port
+
     @staticmethod
     def getResponseHeader(data):
+
         for i in range(len(data)):
             r = b'\r'[0]
             n = b'\n'[0]
             #when we have \r\n\r\n we reached end of header
             if i <= len(data) - 4 and data[i] == r and data[i+1] == n and data[i+2] == r and data[i+3] == n:
                 return data[:i+2]
+
+
+    @staticmethod
+    def changeHttpVersion(request):
+        reqStr = request.decode()
+        reqStr = reqStr.replace('HTTP/1.1', 'HTTP/1.0', 1)
+        return reqStr.encode()
 
 
