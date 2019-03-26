@@ -109,11 +109,11 @@ class Log:
 
     @writeToFile
     def addUserIsNotInProfiles(self, IP):
-        self.logs.append(Log.getTime() + 'User {} is not in proxy profiles and restricted by proxy'.format(IP))
+        self.logs.append(Log.getTime() + 'User {} is not in proxy profiles and will restrict by proxy'.format(IP))
 
     @writeToFile
     def addUserUsedDataIsExtended(self, IP):
-        self.logs.append(Log.getTime() + 'User {} used data is over and restricted by proxy'.format(IP))
+        self.logs.append(Log.getTime() + 'User {} used data is over and will restrict by proxy'.format(IP))
     #TODO: Cache log
 
 
