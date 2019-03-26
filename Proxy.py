@@ -20,8 +20,11 @@ class Proxy:
     log = None
     responseInjector = None
 
+    browserSemaphore = None;
+
     def __init__(self, config):
         # signal.signal(signal.SIGINT, self.shutdown)
+        self.browserSemaphore = threading.Semaphore()
         self.privacy = Privacy(config['privacy'])
         self.log = Log(config['logging'])
         self.log.addLaunchProxy()
@@ -108,12 +111,18 @@ class Proxy:
                 if not inject:
                     inject, data = self.responseInjector.injectPostBody(header, data, request)
 
-                #TODO : ADD SEMAPHORE HERE
-                clientSocket.send(data)  # send to browser/client
-
+                    self.sendDataToBrowser(clientSocket, data)
 
                 if firstPacket :
                     self.log.addProxySentResponse(header.decode())
                     firstPacket = False
             else:
                 break
+
+    def sendDataToBrowser(self, clientSocket, data):
+        self.browserSemaphore.acquire()
+        try:
+            clientSocket.send(data)  # send to browser/client
+        except:
+            pass
+        self.browserSemaphore.release()

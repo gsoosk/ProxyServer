@@ -22,7 +22,6 @@ class ResponseInjector:
                 bodyIndex = resStr.find('<body')
                 endIndex = resStr.find('>', bodyIndex)
                 newResStr = resStr[:endIndex + 1] + self.navbar + resStr[endIndex + 1:]
-                print(newResStr)
                 return True, newResStr.encode()
             else:
                 return False, response
