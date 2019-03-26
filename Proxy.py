@@ -3,7 +3,8 @@ import socket
 import threading
 from Parsers.HttpParser import HttpParser
 from ProxyFeatures.Log import Log
-from ProxyFeatures.privacy import Privacy
+from ProxyFeatures.Privacy import Privacy
+from ProxyFeatures.ResponseInjector import ResponseInjector
 
 class Proxy:
 
@@ -15,13 +16,16 @@ class Proxy:
     maxResponseLength = 100000
     connectionTimeout = 10
 
+    privacy = None
     log = None
+    responseInjector = None
 
     def __init__(self, config):
         # signal.signal(signal.SIGINT, self.shutdown)
         self.privacy = Privacy(config['privacy'])
         self.log = Log(config['logging'])
         self.log.addLaunchProxy()
+        self.responseInjector = ResponseInjector(config['HTTPInjection'])
         self.setConfig(config) # Setting config to class fields
         self.socketInit()
 
@@ -67,7 +71,7 @@ class Proxy:
 
         try:
             server = self.sendDataToServer(newRequest, host, port)
-            self.waitForServer(clientSocket, server)
+            self.waitForServer(clientSocket, server, newRequest)
         except:
             self.log.addTimeoutToConnectServer(url)
 
@@ -79,7 +83,7 @@ class Proxy:
         newRequest = self.privacy.setUserAgent(newRequest.decode())
         return newRequest
 
-    #send a copy of request to website server
+    #send a new request to website server
     def sendDataToServer(self, request, host, port):
         self.log.addOpeningConnection(host, port)
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -89,18 +93,24 @@ class Proxy:
         server.sendall(request)
         return server
 
-    def waitForServer(self, clientSocket, server):
+    def waitForServer(self, clientSocket, server, request):
         firstPacket = True
+        inject = False
+        header = ""
         while True:
             # receive data from web server
             data = server.recv(self.maxResponseLength)
             if len(data) > 0:
-                header = ""
                 if firstPacket :
                     header = HttpParser.getResponseHeader(data)
                     self.log.addServerSentResponse(header.decode())
 
+                if not inject:
+                    inject, data = self.responseInjector.injectPostBody(header, data, request)
+
+                #TODO : ADD SEMAPHORE HERE
                 clientSocket.send(data)  # send to browser/client
+
 
                 if firstPacket :
                     self.log.addProxySentResponse(header.decode())
