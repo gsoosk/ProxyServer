@@ -1,5 +1,6 @@
 from Parsers.HttpParser import HttpParser
 from Config.HtmlConfig import getAlertHtml
+from Config.HttpConfig import getOkResponseData
 class Alert:
 
     enable = None
@@ -20,12 +21,9 @@ class Alert:
 
     def handleRestrictedRequest(self, clientSocket, log, request):
         html = getAlertHtml(self.alertMsg)
-        data = 'HTTP/1.1 200 OK'\
-                'Server: Proxy'\
-                'Content-Type: text/html; charset=utf-8\r\n\r\n'
-        data += html
+        data = getOkResponseData(html)
 
-        clientSocket.send(data.encode())
+        clientSocket.send(data)
         log.addRestricted()
 
         if self.shouldNotify(request) :

@@ -6,6 +6,7 @@ from ProxyFeatures.Log import Log
 from ProxyFeatures.Privacy import Privacy
 from ProxyFeatures.ResponseInjector import ResponseInjector
 from ProxyFeatures.Alert import Alert
+from ProxyFeatures.Accounting import Accounting
 
 class Proxy:
 
@@ -21,6 +22,7 @@ class Proxy:
     log = None
     responseInjector = None
     alert = None
+    accounting = None
 
     browserSemaphore = None
 
@@ -29,6 +31,7 @@ class Proxy:
         self.browserSemaphore = threading.Semaphore()
         self.privacy = Privacy(config['privacy'])
         self.alert = Alert(config['restriction'])
+        self.accounting = Accounting(config['accounting'])
         self.log = Log(config['logging'])
         self.log.addLaunchProxy()
         self.responseInjector = ResponseInjector(config['HTTPInjection'])
@@ -76,12 +79,16 @@ class Proxy:
 
         if self.alert.doesItRestricted(newRequest) :
             self.alert.handleRestrictedRequest(clientSocket, self.log, request)
+        elif not self.accounting.doesUserCanGetData(clientAddress, self.log):
+            self.accounting.restrictUser(clientSocket, clientAddress, self.log)
         else:
             try:
                 server = self.sendDataToServer(newRequest, host, port)
-                self.waitForServer(clientSocket, server, newRequest)
+                self.waitForServer(clientSocket, server, newRequest, clientAddress)
             except:
                 self.log.addTimeoutToConnectServer(url)
+
+        clientSocket.close()
 
 
     def makeNewRequest(self, request):
@@ -102,7 +109,7 @@ class Proxy:
         server.sendall(request)
         return server
 
-    def waitForServer(self, clientSocket, server, request):
+    def waitForServer(self, clientSocket, server, request, clientAddress):
         firstPacket = True
         inject = False
         header = ""
@@ -110,6 +117,7 @@ class Proxy:
             # receive data from web server
             data = server.recv(self.maxResponseLength)
             if len(data) > 0:
+                self.accounting.addUserDataConsume(clientAddress, len(data))
                 if firstPacket :
                     header = HttpParser.getResponseHeader(data)
                     self.log.addServerSentResponse(header.decode())
