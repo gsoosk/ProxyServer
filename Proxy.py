@@ -69,11 +69,11 @@ class Proxy:
 
         newRequest = self.makeNewRequest(request)
 
-        # try:
-        server = self.sendDataToServer(newRequest, host, port)
-        self.waitForServer(clientSocket, server, newRequest)
-        # except:
-        #     self.log.addTimeoutToConnectServer(url)
+        try:
+            server = self.sendDataToServer(newRequest, host, port)
+            self.waitForServer(clientSocket, server, newRequest)
+        except:
+            self.log.addTimeoutToConnectServer(url)
 
     def makeNewRequest(self, request):
         newRequest = HttpParser.changeHttpVersion(request)
@@ -96,19 +96,21 @@ class Proxy:
     def waitForServer(self, clientSocket, server, request):
         firstPacket = True
         inject = False
+        header = ""
         while True:
             # receive data from web server
             data = server.recv(self.maxResponseLength)
             if len(data) > 0:
-                header = ""
                 if firstPacket :
                     header = HttpParser.getResponseHeader(data)
                     self.log.addServerSentResponse(header.decode())
 
                 if not inject:
-                    inject = self.responseInjector.injectPostBody(header, data, request)
+                    inject, data = self.responseInjector.injectPostBody(header, data, request)
 
+                #TODO : ADD SEMAPHORE HERE
                 clientSocket.send(data)  # send to browser/client
+
 
                 if firstPacket :
                     self.log.addProxySentResponse(header.decode())
