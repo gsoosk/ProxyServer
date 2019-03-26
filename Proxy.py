@@ -111,7 +111,7 @@ class Proxy:
                 if not inject:
                     inject, data = self.responseInjector.injectPostBody(header, data, request)
 
-                    self.sendDataToBrowser(clientSocket, data)
+                self.sendDataToBrowser(clientSocket, data)
 
                 if firstPacket :
                     self.log.addProxySentResponse(header.decode())
