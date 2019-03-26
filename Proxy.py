@@ -19,8 +19,9 @@ class Proxy:
     privacy = None
     log = None
     responseInjector = None
+    alert = None
 
-    browserSemaphore = None;
+    browserSemaphore = None
 
     def __init__(self, config):
         # signal.signal(signal.SIGINT, self.shutdown)
@@ -69,14 +70,25 @@ class Proxy:
         url = HttpParser.getUrl(request.decode())
         host, port = HttpParser.getHostAndIp(url)
 
-
         newRequest = self.makeNewRequest(request)
+        str = '''HTTP/1.1 200 OK
+Server: CNPROXY
+Content-Type: text/html; charset=utf-8
 
-        try:
-            server = self.sendDataToServer(newRequest, host, port)
-            self.waitForServer(clientSocket, server, newRequest)
-        except:
-            self.log.addTimeoutToConnectServer(url)
+
+<html>
+    <body>
+    HELLOWORLD
+    </body>
+</html>'''
+        clientSocket.send(str.encode())
+
+        # try:
+        #     server = self.sendDataToServer(newRequest, host, port)
+        #     self.waitForServer(clientSocket, server, newRequest)
+        # except:
+        #     self.log.addTimeoutToConnectServer(url)
+        clientSocket.close()
 
     def makeNewRequest(self, request):
         newRequest = HttpParser.changeHttpVersion(request)
