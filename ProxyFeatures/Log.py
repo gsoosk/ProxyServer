@@ -13,7 +13,7 @@ def writeToFile(originalFunction):
         file = open(logObject.file, 'a+')
         file.write(newLog + "\n")
 
-        # print(newLog)
+        print(newLog)
 
     return new_function
 
@@ -99,6 +99,21 @@ class Log:
         newLog += "++++++++++++++++++++++++++++++++"
         self.logs.append(newLog)
 
+    @writeToFile
+    def addRestricted(self):
+        self.logs.append(Log.getTime() + 'User Restricted from website.')
+
+    @writeToFile
+    def addAdminNotified(self):
+        self.logs.append(Log.getTime() + 'Admin notified with email')
+
+    @writeToFile
+    def addUserIsNotInProfiles(self, IP):
+        self.logs.append(Log.getTime() + 'User {} is not in proxy profiles and will restrict by proxy'.format(IP))
+
+    @writeToFile
+    def addUserUsedDataIsExtended(self, IP):
+        self.logs.append(Log.getTime() + 'User {} used data is over and will restrict by proxy'.format(IP))
     #TODO: Cache log
 
 
