@@ -7,8 +7,8 @@ class Alert:
     enable = None
     targets = None
     alertMsg = 'شما توانایی اتصال به این وبسایت را ندارید.' \
-                '\n'\
-               '\n این وبسایت توسط پروکسی مسدود شده است.'
+                '<br>'\
+               ' این وبسایت توسط پروکسی مسدود شده است.'
     def __init__(self, config):
         self.enable = config['enable']
         self.targets = config['targets']

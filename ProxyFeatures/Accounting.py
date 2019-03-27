@@ -4,7 +4,7 @@ class Accounting:
     users = None
     userNotFoundMsg = 'شما اجازه استفاده از این پروکسی را ندارید.\n'
     usedDataOverMsg = 'شما تمام حجم حساب خود را مصرف کرده‌اید. ' \
-                   '\n' \
+                   '<br>' \
                    'تمامی فعالیت‌ها توسط پروکسی مسدود شده‌اند.'
 
     def __init__(self, config):
