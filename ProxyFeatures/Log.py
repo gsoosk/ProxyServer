@@ -114,6 +114,10 @@ class Log:
     @writeToFile
     def addUserUsedDataIsExtended(self, IP):
         self.logs.append(Log.getTime() + 'User {} used data is over and will restrict by proxy'.format(IP))
+
+    @writeToFile
+    def addMailLog(self, msg):
+        self.logs.append(Log.getTime() + 'Mail ::: ' +msg)
     #TODO: Cache log
 
 
