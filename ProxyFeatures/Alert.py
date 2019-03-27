@@ -1,6 +1,7 @@
 from Parsers.HttpParser import HttpParser
 from Config.HtmlConfig import getAlertHtml
 from Config.HttpConfig import getOkResponseData
+from Config.MailConfig import Mail
 class Alert:
 
     enable = None
@@ -26,8 +27,8 @@ class Alert:
         clientSocket.send(data)
         log.addRestricted()
 
-        if self.shouldNotify(request) :
-            self.notifyAdmin()
+        if self.shouldNotify(request) == 'true':
+            self.notifyAdmin(log, request)
             log.addAdminNotified()
 
     def shouldNotify(self, request):
@@ -37,6 +38,6 @@ class Alert:
                 return target['notify']
         return False
 
-    def notifyAdmin(self):
-        #TODO:Complete email notification
-        print('notif')
+    def notifyAdmin(self, log, request):
+        mail = Mail()
+        mail.sendMail(request.decode(), "UserRestriction", log)
