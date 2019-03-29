@@ -8,7 +8,7 @@
 
   "caching": {
     "enable": true,
-	 "size": 200
+	  "size": 200
   },
 
   "privacy": {
@@ -34,7 +34,7 @@
 		"users":[
 			{
 				"IP": "127.0.0.1",
-				"volume":"800000"
+				"volume":"8000000000"
 			}
 		]
 	},

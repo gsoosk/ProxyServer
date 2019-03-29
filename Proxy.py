@@ -7,6 +7,7 @@ from ProxyFeatures.Privacy import Privacy
 from ProxyFeatures.ResponseInjector import ResponseInjector
 from ProxyFeatures.Alert import Alert
 from ProxyFeatures.Accounting import Accounting
+from ProxyFeatures.Cache import Cache
 
 class Proxy:
 
@@ -19,6 +20,7 @@ class Proxy:
     connectionTimeout = 10
 
     privacy = None
+    cache = None
     log = None
     responseInjector = None
     alert = None
@@ -30,6 +32,7 @@ class Proxy:
         # signal.signal(signal.SIGINT, self.shutdown)
         self.browserSemaphore = threading.Semaphore()
         self.privacy = Privacy(config['privacy'])
+        self.cache = Cache(config['caching'])
         self.alert = Alert(config['restriction'])
         self.accounting = Accounting(config['accounting'])
         self.log = Log(config['logging'])
@@ -37,8 +40,6 @@ class Proxy:
         self.responseInjector = ResponseInjector(config['HTTPInjection'])
         self.setConfig(config) # Setting config to class fields
         self.socketInit()
-
-
 
     def socketInit(self):
         self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -64,7 +65,6 @@ class Proxy:
             newThread.setDaemon(True)
             newThread.start()
 
-
     def clientThread(self, clientSocket, clientAddress):
         self.log.addAcceptClient(clientAddress)
         request = clientSocket.recv(self.maxRequestLength)
@@ -81,6 +81,8 @@ class Proxy:
             self.alert.handleRestrictedRequest(clientSocket, self.log, request)
         elif not self.accounting.doesUserCanGetData(clientAddress, self.log):
             self.accounting.restrictUser(clientSocket, clientAddress, self.log)
+        # elif self.cache.doesRequestCached(newRequest):
+        #     data = self.cache.getRequestData(newRequest)
         else:
             try:
                 server = self.sendDataToServer(newRequest, host, port)
@@ -89,7 +91,6 @@ class Proxy:
                 self.log.addTimeoutToConnectServer(url)
 
         clientSocket.close()
-
 
     def makeNewRequest(self, request):
         newRequest = HttpParser.changeHttpVersion(request)
@@ -115,6 +116,7 @@ class Proxy:
         header = ""
         while True:
             # receive data from web server
+            requestHeader = HttpParser.getResponseHeader(request)
             data = server.recv(self.maxResponseLength)
             if len(data) > 0:
                 self.accounting.addUserDataConsume(clientAddress, len(data))
@@ -124,6 +126,9 @@ class Proxy:
 
                 if not inject:
                     inject, data = self.responseInjector.injectPostBody(header, data, request)
+
+                if self.cache.canCache(requestHeader.decode()):
+                    self.cache.saveToCache(requestHeader , data)
 
                 self.sendDataToBrowser(clientSocket, data)
 
