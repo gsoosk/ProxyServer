@@ -9,19 +9,20 @@ class Privacy:
         self.userAgent = config['userAgent']
 
     def setUserAgent(self , request):
-
-        lines = request.splitlines()
-        newRequest = ""
-
-        for line in lines:
-            if line.find("User-Agent:") is not -1:
-                line = ""
-                line = "User-Agent: "
-                line += self.userAgent
-                 
-            newRequest += line
-            newRequest += "\r\n"
-
-        return newRequest.encode()
+        
+        if self.enable :
+            lines = request.splitlines()
+            newRequest = ""
+            for line in lines:
+                if line.find("User-Agent:") is not -1:
+                    line = ""
+                    line = "User-Agent: "
+                    line += self.userAgent
+                    
+                newRequest += line
+                newRequest += "\r\n"
+            return newRequest.encode()
+        else:
+            return request.encode()
 
 
