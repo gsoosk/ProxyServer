@@ -2,7 +2,7 @@
   "port": 8080,
 
   "logging": {
-    "enable": true,
+    "enable": false,
     "logFile": "proxy2.log"
   },
 
@@ -17,7 +17,7 @@
   },
 
   "restriction": {
-    "enable": true,
+    "enable": false,
     "targets": [
       {
         "URL": "sib.ir",
@@ -40,7 +40,7 @@
 	},
 	
   "HTTPInjection": {
-    "enable": true,
+    "enable": false,
     "post": {
       "body": "پروژه ۲ درس شبکه های کامپیوتری"
     }
