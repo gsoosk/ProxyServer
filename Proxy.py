@@ -82,8 +82,8 @@ class Proxy:
             self.alert.handleRestrictedRequest(clientSocket, self.log, request)
         elif not self.accounting.doesUserCanGetData(clientAddress, self.log):
             self.accounting.restrictUser(clientSocket, clientAddress, self.log)
-        elif self.cache.doesRequestCached(newRequest):
-            data = self.cache.getRequestData(newRequest)
+        elif self.cache.doesRequestCached(newRequest , self.log):
+            data = self.cache.getRequestData(newRequest , self.log)
             self.sendDataToBrowser(clientSocket, data)
         else:
             try:
@@ -128,8 +128,8 @@ class Proxy:
                 if not inject:
                     inject, data = self.responseInjector.injectPostBody(header, data, request)
 
-                if self.cache.canCache(request.decode()):
-                    self.cache.saveToCache(request , data)
+                if self.cache.canCache(request.decode() , self.log):
+                    self.cache.saveToCache(request , data , self.log)
 
                 self.sendDataToBrowser(clientSocket, data)
 

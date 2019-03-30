@@ -2,7 +2,7 @@
   "port": 8080,
 
   "logging": {
-    "enable": false,
+    "enable": true,
     "logFile": "proxy2.log"
   },
 

@@ -118,7 +118,39 @@ class Log:
     @writeToFile
     def addMailLog(self, msg):
         self.logs.append(Log.getTime() + 'Mail ::: ' +msg)
-    #TODO: Cache log
 
+    @writeToFile
+    def addSearchInCache(self):
+        self.logs.append(Log.getTime() + "Proxy search cached data for client request")
+        
+    @writeToFile
+    def addFindRequestInCache(self):
+        self.logs.append(Log.getTime() + "Proxy found client request in cache data")
 
+    @writeToFile
+    def addNotFindRequestInCache(self):
+        self.logs.append(Log.getTime() + "Proxy couldn't find client request in cache data")
 
+    @writeToFile
+    def addProxyCachedDataSentResponse(self, request):
+        newLog = Log.getTime() + 'Proxy sent response from its cache data to client with headers:'
+        newLog += "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+        newLog += request
+        newLog += "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        self.logs.append(newLog)
+
+    @writeToFile
+    def addResponceCannotCache(self):
+        self.logs.append(Log.getTime() + "Proxy can not cache the responce of this request")
+    
+    @writeToFile
+    def addResponceCanCache(self):
+        self.logs.append(Log.getTime() + "Proxy can cache the responce of this request")
+    
+    @writeToFile
+    def addResponceToCacheData(self, request):
+        newLog = Log.getTime() + 'Proxy cached response of server with headers:'
+        newLog += "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+        newLog += request
+        newLog += "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        self.logs.append(newLog)
