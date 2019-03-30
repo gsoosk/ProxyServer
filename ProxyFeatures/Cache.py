@@ -1,5 +1,6 @@
 import collections
 from Parsers.HttpParser import HttpParser
+from Utilities.TimeUtilities import TimeUtilities
 
 class Cache:
     enable = None
@@ -56,6 +57,10 @@ class Cache:
         lines = request.splitlines()
         for line in lines:
             if line.find("Expires:") is not -1:
-                time = line[9:-4]
-
+                time = TimeUtilities.convertToDate(line[9:])
+                nowTime = TimeUtilities.nowTime()
+                if time < nowTime:
+                    return True
         return False
+
+    
