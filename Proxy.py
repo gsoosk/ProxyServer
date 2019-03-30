@@ -77,12 +77,17 @@ class Proxy:
 
         newRequest = self.makeNewRequest(request)
 
-
         if self.alert.doesItRestricted(newRequest) :
             self.alert.handleRestrictedRequest(clientSocket, self.log, request)
         elif not self.accounting.doesUserCanGetData(clientAddress, self.log):
             self.accounting.restrictUser(clientSocket, clientAddress, self.log)
         elif self.cache.doesRequestCached(newRequest , self.log):
+            if self.cache.needCacheModification(newRequest.decode()):
+                try:
+                    server = self.sendDataToServer(newRequest, host, port)
+                    self.waitForServerToGetResponseOfModification(clientSocket, server, newRequest, clientAddress)
+                except:
+                    self.log.addTimeoutToConnectServer(url)
             data = self.cache.getRequestData(newRequest , self.log)
             self.sendDataToBrowser(clientSocket, data)
         else:
@@ -112,6 +117,36 @@ class Proxy:
         server.sendall(request)
         return server
 
+    def waitForServerToGetResponseOfModification(self, clientSocket, server, request, clientAddress):
+        firstPacket = True
+        inject = False
+        header = ""
+        while True:
+            # receive data from web server
+            data = server.recv(self.maxResponseLength)
+            if len(data) > 0:
+                self.accounting.addUserDataConsume(clientAddress, len(data))
+                if firstPacket :
+                    header = HttpParser.getResponseHeader(data)
+                    self.log.addServerSentResponse(header.decode())
+                    if self.cache.responseCanModified(header.decode() , self.log):
+                        self.cache.deleteOldCacheData(request)
+
+                if not inject:
+                    inject, data = self.responseInjector.injectPostBody(header, data, request)
+
+                if self.cache.responseCanModified(header.decode() , self.log): 
+                    self.cache.saveToCache(request , data , self.log)
+    
+                self.sendDataToBrowser(clientSocket, data)
+
+                if firstPacket :
+                    self.log.addProxySentResponse(header.decode())
+                    firstPacket = False
+            else:
+                print(totalData)
+                break
+
     def waitForServer(self, clientSocket, server, request, clientAddress):
         firstPacket = True
         inject = False
@@ -128,15 +163,16 @@ class Proxy:
                 if not inject:
                     inject, data = self.responseInjector.injectPostBody(header, data, request)
 
-                if self.cache.canCache(request.decode() , self.log):
+                if self.cache.requestCanCache(request.decode() , self.log): 
                     self.cache.saveToCache(request , data , self.log)
-
+    
                 self.sendDataToBrowser(clientSocket, data)
 
                 if firstPacket :
                     self.log.addProxySentResponse(header.decode())
                     firstPacket = False
             else:
+                print(totalData)
                 break
 
     def sendDataToBrowser(self, clientSocket, data):

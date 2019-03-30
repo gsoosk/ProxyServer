@@ -12,34 +12,36 @@ class Cache:
         self.cacheSize = config['size']
         self.cacheData = collections.OrderedDict()
     
-    def canCache(self , request , log):
+    def requestCanCache(self , request , log):
         if self.enable:
             lines = request.splitlines()
             for line in lines:
                 if line.find("Pragma: no-cache") is not -1:
                     log.addResponceCannotCache()
                     return False
-            log.addResponceCanCache()
+            # log.addResponceCanCache()
             return True
         else:
             return False
 
     def saveToCache(self , request , data , log):
-        if request in self.cacheData:
-            self.cacheData[request] += data
+        key = self.getCacheKey(request)
+        if key in self.cacheData:
+            self.cacheData[key] += data
             return 
         if len(self.cacheData) >= self.cacheSize:
             self.cacheData.popitem(last=False)
         log.addResponceToCacheData(HttpParser.getResponseHeader(data).decode())
-        self.cacheData[request] = data
+        self.cacheData[key] = data
 
     def doesRequestCached(self , request , log):
+        key = self.getCacheKey(request)
         if self.enable:
             log.addSearchInCache()
-            if request in self.cacheData:
+            if key in self.cacheData:
                 log.addFindRequestInCache()
-                if self.isCacheDataExpire(HttpParser.getResponseHeader(self.cacheData[request]).decode()):
-                    return False
+                if self.isCacheDataExpire(HttpParser.getResponseHeader(self.cacheData[key]).decode()):
+                    return False       
                 return True
             else:
                 log.addNotFindRequestInCache()
@@ -48,8 +50,9 @@ class Cache:
             return False
 
     def getRequestData(self , request , log):
-        data = self.cacheData.pop(request)
-        self.cacheData[request] = data
+        key = self.getCacheKey(request)
+        data = self.cacheData.pop(key)
+        self.cacheData[key] = data
         log.addProxyCachedDataSentResponse(HttpParser.getResponseHeader(data).decode())
         return data
 
@@ -63,4 +66,30 @@ class Cache:
                     return True
         return False
 
-    
+    def getCacheKey(self , request):
+        host = HttpParser.getHostName(request)
+        url = HttpParser.getUrl(request.decode())
+        return host + url
+
+    def needCacheModification(self , request):
+        lines = request.splitlines()
+        for line in lines:
+            if line.find("If-Modified-Since:") is not -1:
+                    return True
+        return False
+
+    def responseCanModified(self , request , log):
+        if self.enable:
+            lines = request.splitlines()
+            for line in lines:
+                if line.find("304 Not Modified") is not -1:
+                    return False
+            return True
+        else:
+            return False
+
+    def deleteOldCacheData(self , request):
+        key = self.getCacheKey(request)
+        if key in self.cacheData:
+            self.cacheData[key] = None
+

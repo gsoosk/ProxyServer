@@ -134,8 +134,3 @@ class HttpParser:
             if reqStr[i].split(' ')[0] == 'Host:' :
                 return reqStr[i].split(' ')[1]
         return ''
-
-
-
-        
-
