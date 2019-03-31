@@ -82,14 +82,15 @@ class Proxy:
         elif not self.accounting.doesUserCanGetData(clientAddress, self.log):
             self.accounting.restrictUser(clientSocket, clientAddress, self.log)
         elif self.cache.doesRequestCached(newRequest , self.log):
-            if self.cache.needCacheModification(newRequest.decode()):
+            if self.cache.needCacheModification(newRequest.decode() , self.log):
                 try:
                     server = self.sendDataToServer(newRequest, host, port)
                     self.waitForServerToGetResponseOfModification(clientSocket, server, newRequest, clientAddress)
                 except:
                     self.log.addTimeoutToConnectServer(url)
-            data = self.cache.getRequestData(newRequest , self.log)
-            self.sendDataToBrowser(clientSocket, data)
+            else:
+                data = self.cache.getRequestData(newRequest , self.log)
+                self.sendDataToBrowser(clientSocket, data)
         else:
             try:
                 server = self.sendDataToServer(newRequest, host, port)
@@ -144,7 +145,6 @@ class Proxy:
                     self.log.addProxySentResponse(header.decode())
                     firstPacket = False
             else:
-                print(totalData)
                 break
 
     def waitForServer(self, clientSocket, server, request, clientAddress):
@@ -172,7 +172,6 @@ class Proxy:
                     self.log.addProxySentResponse(header.decode())
                     firstPacket = False
             else:
-                print(totalData)
                 break
 
     def sendDataToBrowser(self, clientSocket, data):

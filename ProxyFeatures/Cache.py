@@ -19,7 +19,7 @@ class Cache:
                 if line.find("Pragma: no-cache") is not -1:
                     log.addResponceCannotCache()
                     return False
-            # log.addResponceCanCache()
+            log.addResponceCanCache()
             return True
         else:
             return False
@@ -40,7 +40,7 @@ class Cache:
             log.addSearchInCache()
             if key in self.cacheData:
                 log.addFindRequestInCache()
-                if self.isCacheDataExpire(HttpParser.getResponseHeader(self.cacheData[key]).decode()):
+                if self.isCacheDataExpire(HttpParser.getResponseHeader(self.cacheData[key]).decode() , log):
                     return False       
                 return True
             else:
@@ -56,14 +56,16 @@ class Cache:
         log.addProxyCachedDataSentResponse(HttpParser.getResponseHeader(data).decode())
         return data
 
-    def isCacheDataExpire(self , request):
+    def isCacheDataExpire(self , request , log):
         lines = request.splitlines()
         for line in lines:
             if line.find("Expires:") is not -1:
                 time = TimeUtilities.convertToDate(line[9:])
                 nowTime = TimeUtilities.nowTime()
                 if time < nowTime:
+                    log.addCacheDataExpire()
                     return True
+        log.addCacheDataNotExpire()
         return False
 
     def getCacheKey(self , request):
@@ -71,10 +73,11 @@ class Cache:
         url = HttpParser.getUrl(request.decode())
         return host + url
 
-    def needCacheModification(self , request):
+    def needCacheModification(self , request , log):
         lines = request.splitlines()
         for line in lines:
             if line.find("If-Modified-Since:") is not -1:
+                    log.addNeedCacheModification()
                     return True
         return False
 
@@ -83,7 +86,9 @@ class Cache:
             lines = request.splitlines()
             for line in lines:
                 if line.find("304 Not Modified") is not -1:
+                    log.addResponceShouldNotModify()
                     return False
+            log.addResponceShouldModify()
             return True
         else:
             return False
@@ -92,4 +97,3 @@ class Cache:
         key = self.getCacheKey(request)
         if key in self.cacheData:
             self.cacheData[key] = None
-
