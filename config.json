@@ -17,7 +17,7 @@
   },
 
   "restriction": {
-    "enable": false,
+    "enable": true,
     "targets": [
       {
         "URL": "sib.ir",
@@ -34,13 +34,13 @@
 		"users":[
 			{
 				"IP": "127.0.0.1",
-				"volume":"8000000000"
+				"volume":"8000000"
 			}
 		]
 	},
 	
   "HTTPInjection": {
-    "enable": false,
+    "enable": true,
     "post": {
       "body": "پروژه ۲ درس شبکه های کامپیوتری"
     }

@@ -33,6 +33,7 @@ class Cache:
             self.cacheData.popitem(last=False)
         log.addResponceToCacheData(HttpParser.getResponseHeader(data).decode())
         self.cacheData[key] = data
+        print(len(self.cacheData))
 
     def doesRequestCached(self , request , log):
         key = self.getCacheKey(request)
@@ -58,9 +59,12 @@ class Cache:
 
     def isCacheDataExpire(self , request , log):
         lines = request.splitlines()
-        for line in lines:
-            if line.find("Expires:") is not -1:
-                time = TimeUtilities.convertToDate(line[9:])
+        for expireLine in lines:
+            if expireLine.find("Expires:") is not -1:
+                for modifiedLine in lines:
+                    if modifiedLine.find("If-Modified-Since:") is not -1:
+                        return False
+                time = TimeUtilities.convertToDate(expireLine[9:])
                 nowTime = TimeUtilities.nowTime()
                 if time < nowTime:
                     log.addCacheDataExpire()
