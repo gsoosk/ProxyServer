@@ -97,13 +97,9 @@ class Mail :
         subject = "Subject: {}\r\n\r\n".format(self.mailSubject)
         self.clientSocket.send(subject.encode())
 
-
-
-
     def quitServer(self, log):
         quit = "QUIT\r\n"
         self.clientSocket.send(quit.encode())
         recv = self.clientSocket.recv(1024)
         log.addMailLog(recv.decode())
         self.clientSocket.close()
-
