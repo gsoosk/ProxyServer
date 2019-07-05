@@ -1,6 +1,6 @@
 # TODO : def getNavbar(postBody):
 
-alertHtml = '''<!DOCTYPE html>
+alertHtmlBef = '''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -40,7 +40,8 @@ alertHtml = '''<!DOCTYPE html>
 <body>
     <div class="card">
         <p class="msg">
-        {}
+'''
+alertHtmlAfter = '''
         </p>
     </div>
 </body>
@@ -48,4 +49,4 @@ alertHtml = '''<!DOCTYPE html>
 
 
 def getAlertHtml(msg):
-    return alertHtml.format(msg)
+    return alertHtmlBef + msg + alertHtmlAfter

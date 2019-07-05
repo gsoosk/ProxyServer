@@ -5,6 +5,7 @@ from Parsers.HttpParser import HttpParser
 from ProxyFeatures.Log import Log
 from ProxyFeatures.Privacy import Privacy
 from ProxyFeatures.ResponseInjector import ResponseInjector
+from ProxyFeatures.Alert import Alert
 
 class Proxy:
 
@@ -27,6 +28,7 @@ class Proxy:
         # signal.signal(signal.SIGINT, self.shutdown)
         self.browserSemaphore = threading.Semaphore()
         self.privacy = Privacy(config['privacy'])
+        self.alert = Alert(config['restriction'])
         self.log = Log(config['logging'])
         self.log.addLaunchProxy()
         self.responseInjector = ResponseInjector(config['HTTPInjection'])
@@ -71,24 +73,16 @@ class Proxy:
         host, port = HttpParser.getHostAndIp(url)
 
         newRequest = self.makeNewRequest(request)
-        str = '''HTTP/1.1 200 OK
-Server: CNPROXY
-Content-Type: text/html; charset=utf-8
 
+        if self.alert.doesItRestricted(newRequest) :
+            self.alert.handleRestrictedRequest(clientSocket, self.log, request)
+        else:
+            try:
+                server = self.sendDataToServer(newRequest, host, port)
+                self.waitForServer(clientSocket, server, newRequest)
+            except:
+                self.log.addTimeoutToConnectServer(url)
 
-<html>
-    <body>
-    HELLOWORLD
-    </body>
-</html>'''
-        clientSocket.send(str.encode())
-
-        # try:
-        #     server = self.sendDataToServer(newRequest, host, port)
-        #     self.waitForServer(clientSocket, server, newRequest)
-        # except:
-        #     self.log.addTimeoutToConnectServer(url)
-        clientSocket.close()
 
     def makeNewRequest(self, request):
         newRequest = HttpParser.changeHttpVersion(request)

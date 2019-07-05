@@ -56,13 +56,13 @@ class HttpParser:
 
     @staticmethod
     def changeHttpVersion(request):
-        reqStr = request.decode()
+        reqStr = request.decode(errors = 'ignore')
         reqStr = reqStr.replace('HTTP/1.1', 'HTTP/1.0', 1)
         return reqStr.encode()
 
     @staticmethod
     def removeHostname(request):
-        reqStr = request.decode()
+        reqStr = request.decode(errors = 'ignore')
         reqStr = reqStr.split('\r\n')
 
         httpFirstLine = reqStr[0].split(' ')
@@ -83,7 +83,7 @@ class HttpParser:
 
     @staticmethod
     def removeProxyConnection(request):
-        reqStr = request.decode()
+        reqStr = request.decode(errors = 'ignore')
         reqStr = reqStr.split('\r\n')
         for i in range(len(reqStr)) :
             if reqStr[i].split(' ')[0] == 'Connection:' :
@@ -101,15 +101,41 @@ class HttpParser:
     @staticmethod
     def isIndexReq(request):
 
-        reqStr = request.decode()
+        reqStr = request.decode(errors = 'ignore')
         try:
             return reqStr.split('\r\n')[0].split(' ')[1] == '/'
         except :
             return False
     @staticmethod
     def isResponseStatusOk(responseHeader):
-        resStr = responseHeader.decode()
+        resStr = responseHeader.decode(errors = 'ignore')
         try:
             return resStr.split('\n')[0].split(' ')[1] == '200'
         except:
             return False
+
+    @staticmethod
+    def changeAcceptEncoding(request):
+        reqStr = request.decode(errors = 'ignore')
+        reqStr = reqStr.split('\r\n')
+        for i in range(len(reqStr)) :
+            if reqStr[i].split(' ')[0] == 'Accept-Encoding:' :
+                reqStr[i] = 'Accept-Encoding: identity'
+                break
+        reqStr = '\r\n'.join(reqStr)
+        return reqStr.encode()
+
+    @staticmethod
+    def getHostName(request):
+        reqStr = request.decode(errors = 'ignore')
+        reqStr.split('\r\n')
+        reqStr = reqStr.split('\r\n')
+        for i in range(len(reqStr)) :
+            if reqStr[i].split(' ')[0] == 'Host:' :
+                return reqStr[i].split(' ')[1]
+        return ''
+
+
+
+        
+

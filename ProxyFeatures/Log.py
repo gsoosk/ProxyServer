@@ -99,6 +99,13 @@ class Log:
         newLog += "++++++++++++++++++++++++++++++++"
         self.logs.append(newLog)
 
+    @writeToFile
+    def addRestricted(self):
+        self.logs.append(Log.getTime() + 'User Restricted from website.')
+
+    @writeToFile
+    def addAdminNotified(self):
+        self.logs.append(Log.getTime() + 'Admin notified with email')
     #TODO: Cache log
 
 
