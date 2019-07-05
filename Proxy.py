@@ -75,6 +75,8 @@ class Proxy:
         newRequest = HttpParser.changeHttpVersion(request)
         newRequest = HttpParser.removeHostname(newRequest)
         newRequest = HttpParser.removeProxyConnection(newRequest)
+        newRequest = HttpParser.changeAcceptEncoding(newRequest)
+        newRequest = self.privacy.setUserAgent(newRequest.decode())
         return newRequest
 
     #send a copy of request to website server
