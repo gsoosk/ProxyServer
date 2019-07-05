@@ -9,8 +9,8 @@ This is an implementation of a Http `proxy server` application with some fantasy
     * Logs everything happens to a file.
 ```json
 "logging": {
-    "enable": <true/false>,
-    "logFile": "<logFileName>"
+    "enable": true,
+    "logFile": "logFileName.log"
 } 
 ```
 * **Restriction**
@@ -18,13 +18,12 @@ This is an implementation of a Http `proxy server` application with some fantasy
     * Also it can notify admin with email in smtp protocol. ( Actually email address and password are hardcoded in code and can be changed)
 ```json
 "restriction": {
-    "enable": <true/false>,
+    "enable": true,
     "targets": [
       {
-        "URL": "<webSite1Url>",
-        "notify": "<true/false>"
+        "URL": "www.somewebsite.com",
+        "notify": "true"
       },
-      ...
     ]
   }
 ```
@@ -32,9 +31,9 @@ This is an implementation of a Http `proxy server` application with some fantasy
     * It can show a message in a navbar header for index page of websites.
 ```json
 "HTTPInjection": {
-    "enable": <true/false>,
+    "enable": true,
     "post": {
-      "body": "<injectionText>"
+      "body": "An Injection Text"
     }
   }
 ```
@@ -44,10 +43,9 @@ This is an implementation of a Http `proxy server` application with some fantasy
 "accounting":{
     "users":[
         {
-            "IP": "<userIp>",
-            "volume":"<maximumVolume>"
+            "IP": "127.0.0.1",
+            "volume":"8000000"
         },
-        ...
     ]
 }
 ```
@@ -56,8 +54,8 @@ This is an implementation of a Http `proxy server` application with some fantasy
   *  With adding a specific user agent you can increase your privacy. 
 ```json
  "privacy": {
-    "enable": <true/false>,
-    "userAgent": "<privacyText>"
+    "enable": true,
+    "userAgent": "Proxy Server V1.000"
   }
 ```
 * **Caching**
@@ -65,8 +63,8 @@ This is an implementation of a Http `proxy server` application with some fantasy
   * It uses Http cache system.
 ```json
 "caching": {
-    "enable": <true/false>,
-    "size": <cacheSizeInResourceNum>
+    "enable": true,
+    "size": 200
 }
 ```
 
